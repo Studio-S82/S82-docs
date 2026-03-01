@@ -1,0 +1,5 @@
+{
+  "version": "2.1.0",
+  "changelog": "Fix audio bug, add server banner, webhook logging",
+  "url": "https://s82studio.tebex.io/"
+}
