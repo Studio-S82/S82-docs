@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S82 Item Upgrade — Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ── VARIABLES ───────────────────────────────────────────── */
+:root {
+  --bg:        #110a0f;
+  --bg-2:      #1a0d14;
+  --bg-3:      #221020;
+  --surface:   #2a1422;
+  --border:    rgba(232,127,168,0.14);
+  --border-hi: rgba(232,127,168,0.40);
+  --pink:      #e87fa8;
+  --pink-dim:  #b85a7e;
+  --pink-glow: rgba(232,127,168,0.18);
+  --gold:      #f0c060;
+  --green:     #6ee7a0;
+  --red:       #f07080;
+  --blue:      #7ab8f5;
+  --text:      #f0dce8;
+  --text-2:    #b888a8;
+  --text-3:    #6a3858;
+  --mono:      'Space Mono', monospace;
+  --sans:      'DM Sans', sans-serif;
+  --sidebar-w: 268px;
+  --r:         8px;
+}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+::selection { background: var(--pink-glow); color: var(--pink); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+/* ── NOISE OVERLAY ───────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+
+/* ── TOP NAV ─────────────────────────────────────────────── */
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 56px;
+  background: rgba(17,10,15,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 0.85rem; font-weight: 700;
+  color: var(--pink); text-decoration: none; letter-spacing: 0.05em;
+}
+.nav-brand .dot { width: 8px; height: 8px; background: var(--pink); border-radius: 50%; box-shadow: 0 0 8px var(--pink); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* Language toggle */
+.lang-toggle {
+  display: flex; align-items: center; gap: 0;
+  background: var(--bg-3); border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden; font-size: 0.72rem; font-family: var(--mono);
+}
+.lang-toggle button {
+  padding: 5px 12px; border: none; background: none;
+  color: var(--text-3); cursor: pointer; transition: 0.15s;
+  font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
+}
+.lang-toggle button.active { background: var(--pink-dim); color: #fff; }
+
+.nav-github {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 6px;
+  border: 1px solid var(--border-hi);
+  color: var(--text-2); font-size: 0.75rem; font-family: var(--mono);
+  text-decoration: none; transition: 0.15s;
+}
+.nav-github:hover { background: var(--pink-glow); color: var(--pink); }
+
+/* hamburger */
+#ham { display: none; background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-2); padding: 6px 10px; cursor: pointer; font-size: 1rem; }
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+#layout { display: flex; padding-top: 56px; min-height: 100vh; }
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+#sidebar {
+  position: fixed; top: 56px; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--bg-2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto; z-index: 90;
+  padding: 20px 0 40px;
+  transition: transform 0.26s ease;
+}
+.sidebar-section {
+  padding: 0 16px;
+  margin-bottom: 6px;
+}
+.sidebar-label {
+  font-family: var(--mono); font-size: 0.60rem; font-weight: 700;
+  letter-spacing: 0.18em; color: var(--text-3);
+  text-transform: uppercase; padding: 14px 12px 6px;
+}
+.sidebar-link {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 12px; border-radius: 6px;
+  color: var(--text-2); font-size: 0.82rem; text-decoration: none;
+  transition: 0.14s; cursor: pointer; border: none; background: none;
+  width: 100%; text-align: left;
+}
+.sidebar-link:hover { background: var(--bg-3); color: var(--text); }
+.sidebar-link.active { background: var(--pink-glow); color: var(--pink); }
+.sidebar-link i { width: 14px; font-size: 0.72rem; opacity: 0.7; flex-shrink: 0; }
+.sidebar-divider { height: 1px; background: var(--border); margin: 10px 16px; }
+
+.sidebar-badge {
+  margin-left: auto; font-size: 0.60rem; font-family: var(--mono);
+  padding: 1px 6px; border-radius: 4px; font-weight: 700;
+}
+.badge-new { background: rgba(110,231,160,0.15); color: var(--green); }
+.badge-req { background: rgba(240,192,96,0.15); color: var(--gold); }
+
+/* version pill */
+.sidebar-version {
+  margin: 16px 16px 0;
+  padding: 10px 14px;
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 0.72rem; color: var(--text-3);
+}
+.sidebar-version strong { color: var(--pink); font-family: var(--mono); }
+
+/* ── MAIN CONTENT ────────────────────────────────────────── */
+#main {
+  margin-left: var(--sidebar-w);
+  flex: 1; min-width: 0;
+  padding: 52px 64px 100px;
+  max-width: 860px;
+}
+
+/* ── SECTIONS ────────────────────────────────────────────── */
+.doc-section { display: none; }
+.doc-section.active { display: block; animation: fadeIn 0.22s ease; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+
+/* ── HERO ────────────────────────────────────────────────── */
+.hero {
+  padding: 48px 0 52px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--pink-glow); border: 1px solid var(--border-hi);
+  border-radius: 20px; padding: 4px 14px;
+  font-family: var(--mono); font-size: 0.68rem; color: var(--pink);
+  margin-bottom: 20px; letter-spacing: 0.06em;
+}
+.hero h1 {
+  font-family: var(--mono); font-size: 2.6rem; font-weight: 700;
+  line-height: 1.1; color: var(--text); margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.hero h1 span { color: var(--pink); }
+.hero p { font-size: 1rem; color: var(--text-2); max-width: 540px; line-height: 1.75; margin-bottom: 28px; }
+.hero-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 6px;
+  font-size: 0.72rem; font-family: var(--mono);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+.pill-pink { border-color: var(--border-hi); color: var(--pink); background: var(--pink-glow); }
+.pill-gold { border-color: rgba(240,192,96,0.35); color: var(--gold); background: rgba(240,192,96,0.07); }
+.pill-green { border-color: rgba(110,231,160,0.3); color: var(--green); background: rgba(110,231,160,0.06); }
+
+/* ── TYPOGRAPHY ──────────────────────────────────────────── */
+h2 {
+  font-family: var(--mono); font-size: 1.25rem; font-weight: 700;
+  color: var(--text); margin: 40px 0 14px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  letter-spacing: -0.01em;
+}
+h2:first-child { margin-top: 0; }
+h3 {
+  font-size: 0.90rem; font-weight: 600; color: var(--pink);
+  margin: 28px 0 10px; font-family: var(--mono);
+  display: flex; align-items: center; gap: 8px;
+}
+h3::before { content: '//'; color: var(--text-3); font-size: 0.78rem; }
+p { color: var(--text-2); margin-bottom: 14px; font-size: 0.93rem; }
+strong { color: var(--text); font-weight: 600; }
+a { color: var(--pink); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── CODE ────────────────────────────────────────────────── */
+code {
+  font-family: var(--mono); font-size: 0.80rem;
+  background: var(--bg-3); color: var(--pink);
+  padding: 2px 7px; border-radius: 4px;
+  border: 1px solid var(--border);
+}
+pre {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--pink-dim);
+  border-radius: var(--r);
+  padding: 20px 22px;
+  overflow-x: auto;
+  margin: 16px 0 20px;
+  position: relative;
+}
+pre code {
+  background: none; border: none; padding: 0;
+  font-size: 0.82rem; color: var(--text-2);
+  display: block; line-height: 1.75;
+}
+.hl-key   { color: var(--pink); }
+.hl-str   { color: var(--gold); }
+.hl-num   { color: var(--blue); }
+.hl-cmt   { color: var(--text-3); font-style: italic; }
+.hl-fn    { color: var(--green); }
+
+/* copy button */
+.pre-wrap { position: relative; }
+.copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 5px; color: var(--text-3); font-size: 0.68rem;
+  font-family: var(--mono); padding: 3px 9px; cursor: pointer;
+  transition: 0.15s; display: flex; align-items: center; gap: 5px;
+}
+.copy-btn:hover { color: var(--pink); border-color: var(--border-hi); }
+
+/* ── CALLOUTS ────────────────────────────────────────────── */
+.callout {
+  border-radius: var(--r); padding: 14px 18px;
+  margin: 16px 0; display: flex; gap: 13px;
+  font-size: 0.86rem; border: 1px solid;
+  align-items: flex-start;
+}
+.callout i { margin-top: 2px; flex-shrink: 0; font-size: 0.90rem; }
+.callout-tip    { background: rgba(110,231,160,0.06); border-color: rgba(110,231,160,0.25); color: #a8f0c8; }
+.callout-tip i  { color: var(--green); }
+.callout-warn   { background: rgba(240,192,96,0.06); border-color: rgba(240,192,96,0.25); color: #f5d88a; }
+.callout-warn i { color: var(--gold); }
+.callout-info   { background: rgba(122,184,245,0.06); border-color: rgba(122,184,245,0.25); color: #a8d0f5; }
+.callout-info i { color: var(--blue); }
+
+/* ── TABLE ───────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: var(--r); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg-3); }
+th {
+  padding: 10px 16px; text-align: left;
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+  color: var(--text-3); font-weight: 700; text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 10px 16px; color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+td:first-child { font-family: var(--mono); font-size: 0.80rem; color: var(--pink); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--bg-3); }
+
+/* ── STEPS ───────────────────────────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+.step { display: flex; gap: 18px; padding-bottom: 28px; position: relative; }
+.step:last-child { padding-bottom: 0; }
+.step-line {
+  display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+}
+.step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg-3); border: 2px solid var(--border-hi);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+  color: var(--pink); flex-shrink: 0;
+}
+.step-connector {
+  flex: 1; width: 1px; background: var(--border);
+  margin-top: 4px; min-height: 20px;
+}
+.step:last-child .step-connector { display: none; }
+.step-body { padding-top: 4px; flex: 1; }
+.step-body h4 { font-size: 0.90rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.step-body p { margin-bottom: 8px; font-size: 0.86rem; }
+
+/* ── FEATURES GRID ───────────────────────────────────────── */
+.features {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px; margin: 20px 0;
+}
+.feat-card {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px 16px;
+  transition: 0.16s;
+}
+.feat-card:hover { border-color: var(--border-hi); background: var(--bg-3); transform: translateY(-2px); }
+.feat-icon { font-size: 1.2rem; margin-bottom: 10px; }
+.feat-card h4 { font-size: 0.84rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.feat-card p  { font-size: 0.78rem; color: var(--text-3); line-height: 1.5; margin: 0; }
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.doc-footer {
+  margin-top: 60px; padding-top: 28px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.doc-footer p { font-size: 0.78rem; color: var(--text-3); margin: 0; }
+.doc-footer a { color: var(--pink); }
+.footer-nav { display: flex; gap: 8px; }
+.footer-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: 6px;
+  border: 1px solid var(--border); color: var(--text-2);
+  font-size: 0.78rem; cursor: pointer; background: none;
+  transition: 0.15s; font-family: var(--sans);
+}
+.footer-btn:hover { border-color: var(--border-hi); color: var(--pink); }
+.footer-btn.next { background: var(--pink-glow); border-color: var(--border-hi); color: var(--pink); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; padding: 40px 24px 80px; }
+  #ham { display: flex; }
+  .hero h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav id="topnav">
+  <a class="nav-brand" href="#">
+    <div class="dot"></div>
+    S82 <span style="color:var(--text-3);margin:0 4px">/</span> DOCS
+  </a>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="active" onclick="setLang('en')" id="btn-en">EN</button>
+      <button onclick="setLang('vi')" id="btn-vi">VI</button>
+    </div>
+    <a class="nav-github" href="https://github.com/S82Dev" target="_blank">
+      <i class="fab fa-github"></i> GitHub
+    </a>
+    <button id="ham" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-version">
+    <div style="font-size:0.68rem;color:var(--text-3);margin-bottom:3px" data-en="Current version" data-vi="Phiên bản hiện tại">Current version</div>
+    <strong>v2.1.0</strong>
+    <span style="color:var(--text-3);font-size:0.68rem"> — S82dapbalo</span>
+  </div>
+
+  <div class="sidebar-label" data-en="Getting Started" data-vi="Bắt Đầu">Getting Started</div>
+  <div class="sidebar-section">
+    <button class="sidebar-link active" onclick="show('intro')">
+      <i class="fas fa-star"></i>
+      <span data-en="Introduction" data-vi="Giới Thiệu">Introduction</span>
+    </button>
+    <button class="sidebar-link" onclick="show('requirements')">
+      <i class="fas fa-list-check"></i>
+      <span data-en="Requirements" data-vi="Yêu Cầu">Requirements</span>
+      <span class="sidebar-badge badge-req" data-en="READ FIRST" data-vi="ĐỌC TRƯỚC">READ FIRST</span>
+    </button>
+    <button class="sidebar-link" onclick="show('install')">
+      <i class="fas fa-download"></i>
+      <span data-en="Installation" data-vi="Cài Đặt">Installation</span>
+    </button>
+  </div>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label" data-en="Configuration" data-vi="Cấu Hình">Configuration</div>
+  <div class="sidebar-section">
+    <button class="sidebar-link" onclick="show('config-basic')">
+      <i class="fas fa-sliders"></i>
+      <span data-en="Basic Settings" data-vi="Cài Đặt Cơ Bản">Basic Settings</span>
+    </button>
+    <button class="sidebar-link" onclick="show('config-banner')">
+      <i class="fas fa-image"></i>
+      <span data-en="Server Banner" data-vi="Banner Server">Server Banner</span>
+    </button>
+    <button class="sidebar-link" onclick="show('config-webhook')">
+      <i class="fab fa-discord"></i>
+      <span data-en="Webhook" data-vi="Webhook">Webhook</span>
+    </button>
+    <button class="sidebar-link" onclick="show('config-recipes')">
+      <i class="fas fa-flask"></i>
+      <span data-en="Recipes" data-vi="Công Thức">Recipes</span>
+    </button>
+  </div>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label" data-en="Usage" data-vi="Sử Dụng">Usage</div>
+  <div class="sidebar-section">
+    <button class="sidebar-link" onclick="show('howtoplay')">
+      <i class="fas fa-gamepad"></i>
+      <span data-en="How to Play" data-vi="Cách Chơi">How to Play</span>
+    </button>
+    <button class="sidebar-link" onclick="show('faq')">
+      <i class="fas fa-circle-question"></i>
+      <span data-en="FAQ" data-vi="FAQ">FAQ</span>
+    </button>
+  </div>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label" data-en="Other Scripts" data-vi="Script Khác">Other Scripts</div>
+  <div class="sidebar-section">
+    <button class="sidebar-link" style="opacity:0.45;cursor:default">
+      <i class="fas fa-plus"></i>
+      <span data-en="Coming soon..." data-vi="Sắp ra mắt...">Coming soon...</span>
+      <span class="sidebar-badge badge-new">NEW</span>
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="layout">
+<main id="main">
+
+<!-- ══ INTRO ══════════════════════════════════════════════ -->
+<section class="doc-section active" id="sec-intro">
+  <div class="hero">
+    <div class="hero-tag"><i class="fas fa-spa"></i> <span data-en="FiveM Resource" data-vi="Resource FiveM">FiveM Resource</span></div>
+    <h1 data-en="S82 Item <span>Upgrade</span>" data-vi="S82 Nâng Cấp <span>Vật Phẩm</span>">S82 Item <span>Upgrade</span></h1>
+    <p data-en="A premium drag-and-drop item upgrade system for FiveM with sakura aesthetics, anti-cheat server-side logic, Discord webhook logging, and bilingual support."
+       data-vi="Hệ thống nâng cấp vật phẩm drag-and-drop cao cấp cho FiveM với giao diện Sakura, logic chống gian lận phía server, log webhook Discord và hỗ trợ song ngữ.">
+      A premium drag-and-drop item upgrade system for FiveM with sakura aesthetics, anti-cheat server-side logic, Discord webhook logging, and bilingual support.
+    </p>
+    <div class="hero-pills">
+      <div class="pill pill-pink"><i class="fas fa-shield-halved"></i> Server-side Logic</div>
+      <div class="pill pill-gold"><i class="fas fa-language"></i> EN / VI</div>
+      <div class="pill pill-green"><i class="fab fa-discord"></i> Webhook Logs</div>
+      <div class="pill"><i class="fas fa-code-branch"></i> v2.1.0</div>
+    </div>
+  </div>
+
+  <h2 data-en="✦ Features" data-vi="✦ Tính Năng">✦ Features</h2>
+  <div class="features">
+    <div class="feat-card">
+      <div class="feat-icon">🎴</div>
+      <h4 data-en="Drag & Drop UI" data-vi="Giao Diện Drag & Drop">Drag & Drop UI</h4>
+      <p data-en="Intuitive sakura-themed interface with cherry blossom petal animations." data-vi="Giao diện chủ đề Sakura trực quan với hiệu ứng cánh hoa anh đào.">Intuitive sakura-themed interface with cherry blossom petal animations.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔒</div>
+      <h4 data-en="Anti-Cheat" data-vi="Chống Gian Lận">Anti-Cheat</h4>
+      <p data-en="All logic runs server-side. Exploit detection with Discord alerts." data-vi="Toàn bộ logic xử lý phía server. Phát hiện exploit với cảnh báo Discord.">All logic runs server-side. Exploit detection with Discord alerts.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🛡️</div>
+      <h4 data-en="Shield Card" data-vi="Thẻ Bảo Vệ">Shield Card</h4>
+      <p data-en="Optional per-recipe protection card that saves your item on failure." data-vi="Thẻ bảo vệ tùy chọn theo công thức, giữ lại vật phẩm khi thất bại.">Optional per-recipe protection card that saves your item on failure.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⭐</div>
+      <h4 data-en="Luck System" data-vi="Hệ Thống May Mắn">Luck System</h4>
+      <p data-en="Base + max luck with optional bonus materials to increase success rate." data-vi="Tỷ lệ cơ bản + tối đa với nguyên liệu bonus tăng tỷ lệ thành công.">Base + max luck with optional bonus materials to increase success rate.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📡</div>
+      <h4 data-en="Discord Webhook" data-vi="Webhook Discord">Discord Webhook</h4>
+      <p data-en="Every upgrade event logged as a rich embed to your admin channel." data-vi="Mọi sự kiện nâng cấp được log dưới dạng embed về kênh admin.">Every upgrade event logged as a rich embed to your admin channel.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔄</div>
+      <h4 data-en="Version Check" data-vi="Kiểm Tra Phiên Bản">Version Check</h4>
+      <p data-en="Auto checks for updates on every server start and notifies in console." data-vi="Tự kiểm tra cập nhật mỗi lần server khởi động và thông báo console.">Auto checks for updates on every server start and notifies in console.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <i class="fas fa-circle-info"></i>
+    <div>
+      <strong data-en="Compatibility" data-vi="Tương Thích">Compatibility</strong><br>
+      <span data-en="Works with ESX, QB-Core, QBox and ox_inventory. Framework is auto-detected." data-vi="Tương thích với ESX, QB-Core, QBox và ox_inventory. Framework được tự động nhận diện.">Works with ESX, QB-Core, QBox and ox_inventory. Framework is auto-detected.</span>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <p data-en="© 2025 S82 Dev · All rights reserved" data-vi="© 2025 S82 Dev · Bảo lưu mọi quyền">© 2025 S82 Dev · All rights reserved</p>
+    <div class="footer-nav">
+      <button class="footer-btn next" onclick="show('requirements')">
+        <span data-en="Requirements" data-vi="Yêu Cầu">Requirements</span> <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ REQUIREMENTS ═══════════════════════════════════════ -->
+<section class="doc-section" id="sec-requirements">
+  <h2 data-en="Requirements" data-vi="Yêu Cầu Hệ Thống">Requirements</h2>
+  <p data-en="Ensure all dependencies are installed and running before S82dapbalo in your server.cfg." data-vi="Đảm bảo tất cả dependencies đã cài đặt và chạy TRƯỚC S82dapbalo trong server.cfg.">
+    Ensure all dependencies are installed and running before S82dapbalo in your server.cfg.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th data-en="Dependency" data-vi="Dependency">Dependency</th>
+        <th data-en="Version" data-vi="Phiên Bản">Version</th>
+        <th data-en="Notes" data-vi="Ghi Chú">Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>FiveM</td><td>Build 6000+</td><td data-en="Required" data-vi="Bắt buộc">Required</td></tr>
+        <tr><td>ox_inventory</td><td>Latest</td><td data-en="Item management & images" data-vi="Quản lý item & ảnh">Item management & images</td></tr>
+        <tr><td>ox_lib</td><td>Latest</td><td data-en="Notifications" data-vi="Thông báo">Notifications</td></tr>
+        <tr><td>ESX / QB-Core / QBox</td><td>Any</td><td data-en="Auto-detected, one required" data-vi="Tự nhận diện, cần ít nhất 1">Auto-detected, one required</td></tr>
+        <tr><td>ox_target</td><td>Latest</td><td data-en="Optional — prop interaction" data-vi="Tùy chọn — tương tác prop">Optional — prop interaction</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-warn">
+    <i class="fas fa-triangle-exclamation"></i>
+    <span data-en="ox_lib and ox_inventory must be ensured BEFORE S82dapbalo in server.cfg or notifications and images will not work." data-vi="ox_lib và ox_inventory phải được ensure TRƯỚC S82dapbalo trong server.cfg, nếu không thông báo và ảnh sẽ không hoạt động.">ox_lib and ox_inventory must be ensured BEFORE S82dapbalo in server.cfg or notifications and images will not work.</span>
+  </div>
+  <div class="doc-footer">
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('intro')"><i class="fas fa-arrow-left"></i> <span data-en="Introduction" data-vi="Giới Thiệu">Introduction</span></button>
+      <button class="footer-btn next" onclick="show('install')"><span data-en="Installation" data-vi="Cài Đặt">Installation</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ INSTALLATION ════════════════════════════════════════ -->
+<section class="doc-section" id="sec-install">
+  <h2 data-en="Installation" data-vi="Cài Đặt">Installation</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-line"><div class="step-num">1</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Download & Extract" data-vi="Tải Về & Giải Nén">Download & Extract</h4>
+        <p data-en="Download the resource from your Tebex S82 purchase page and extract the zip file. You will get a folder named S82dapbalo." data-vi="Tải resource từ trang mua Tebex S82 và giải nén file zip. Bạn sẽ có thư mục tên S82dapbalo.">Download the resource from your Tebex S82 purchase page and extract the zip file. You will get a folder named S82dapbalo.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">2</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Place in Resources" data-vi="Đặt vào Resources">Place in Resources</h4>
+        <p data-en="Copy the S82dapbalo folder into your server's resources directory." data-vi="Sao chép thư mục S82dapbalo vào thư mục resources của server.">Copy the S82dapbalo folder into your server's resources directory.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">3</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Add to server.cfg" data-vi="Thêm vào server.cfg">Add to server.cfg</h4>
+        <div class="pre-wrap">
+          <pre><code><span class="hl-cmt"># Make sure dependencies come first</span>
+ensure ox_inventory
+ensure ox_lib
+ensure S82dapbalo</code></pre>
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">4</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Configure" data-vi="Cấu Hình">Configure</h4>
+        <p data-en="Open config.lua and fill in your settings. See the Configuration section for details." data-vi="Mở config.lua và điền thông tin cần thiết. Xem phần Cấu Hình để biết chi tiết.">Open config.lua and fill in your settings. See the Configuration section for details.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">5</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Restart Server" data-vi="Khởi Động Lại">Restart Server</h4>
+        <p data-en="Run restart S82dapbalo in the server console or do a full server restart." data-vi="Chạy restart S82dapbalo trong console server hoặc restart toàn bộ server.">Run <code>restart S82dapbalo</code> in the server console or do a full server restart.</p>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('requirements')"><i class="fas fa-arrow-left"></i> <span data-en="Requirements" data-vi="Yêu Cầu">Requirements</span></button>
+      <button class="footer-btn next" onclick="show('config-basic')"><span data-en="Configuration" data-vi="Cấu Hình">Configuration</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONFIG BASIC ════════════════════════════════════════ -->
+<section class="doc-section" id="sec-config-basic">
+  <h2 data-en="Basic Settings" data-vi="Cài Đặt Cơ Bản">Basic Settings</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th data-en="Key" data-vi="Khóa">Key</th>
+        <th data-en="Default" data-vi="Mặc Định">Default</th>
+        <th data-en="Description" data-vi="Mô Tả">Description</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Config.Locale</td><td><code>"en"</code></td><td data-en='"en" or "vi"' data-vi='"en" hoặc "vi"'>"en" or "vi"</td></tr>
+        <tr><td>Config.Framework</td><td><code>"auto"</code></td><td data-en='"auto", "esx", "qb", "qbox"' data-vi='"auto", "esx", "qb", "qbox"'>"auto", "esx", "qb", "qbox"</td></tr>
+        <tr><td>Config.CraftCooldown</td><td><code>3000</code></td><td data-en="Cooldown between upgrades (ms)" data-vi="Thời gian chờ giữa các lần nâng cấp (ms)">Cooldown between upgrades (ms)</td></tr>
+        <tr><td>Config.UseOxTarget</td><td><code>true</code></td><td data-en="Use ox_target for table interaction" data-vi="Dùng ox_target để tương tác bàn">Use ox_target for table interaction</td></tr>
+        <tr><td>Config.Command</td><td><code>"craft"</code></td><td data-en="Chat command to open UI" data-vi="Lệnh chat để mở UI">Chat command to open UI</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 data-en="Notify Settings" data-vi="Cài Đặt Thông Báo">Notify Settings</h3>
+  <div class="pre-wrap">
+    <pre><code><span class="hl-key">Config</span>.Notify = {
+    duration = <span class="hl-num">5000</span>,         <span class="hl-cmt">-- ms</span>
+    position = <span class="hl-str">'center-left'</span>, <span class="hl-cmt">-- top | top-right | bottom-right | center-left ...</span>
+    title    = <span class="hl-str">'S82 Upgrade'</span>, <span class="hl-cmt">-- shown above each notification</span>
+}</code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+
+  <h3 data-en="Prop Model" data-vi="Prop Vật Lý">Prop Model</h3>
+  <div class="pre-wrap">
+    <pre><code><span class="hl-key">Config</span>.PropModel   = <span class="hl-str">'prop_crosssaw_01'</span> <span class="hl-cmt">-- set nil to disable</span>
+<span class="hl-key">Config</span>.PropOffset  = <span class="hl-fn">vec3</span>(<span class="hl-num">0.0</span>, <span class="hl-num">0.0</span>, <span class="hl-num">0.0</span>)
+<span class="hl-key">Config</span>.PropHeading = <span class="hl-num">330.4</span></code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+
+  <h3 data-en="Crafting Locations" data-vi="Vị Trí Bàn Nâng Cấp">Crafting Locations</h3>
+  <div class="pre-wrap">
+    <pre><code><span class="hl-key">Config</span>.CraftingLocations = {
+    {
+        coords = <span class="hl-fn">vec3</span>(<span class="hl-num">-1520.49</span>, <span class="hl-num">-3212.54</span>, <span class="hl-num">13.65</span>),
+        label  = <span class="hl-str">'Upgrade Table'</span>,
+        icon   = <span class="hl-str">'fa-solid fa-hammer'</span>,
+    },
+    <span class="hl-cmt">-- add more locations here</span>
+}</code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+  <div class="doc-footer">
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('install')"><i class="fas fa-arrow-left"></i> <span data-en="Installation" data-vi="Cài Đặt">Installation</span></button>
+      <button class="footer-btn next" onclick="show('config-banner')"><span data-en="Server Banner" data-vi="Banner Server">Server Banner</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONFIG BANNER ═══════════════════════════════════════ -->
+<section class="doc-section" id="sec-config-banner">
+  <h2 data-en="Server Banner" data-vi="Banner Server">Server Banner</h2>
+  <p data-en="Displays your server logo inside the UI below the result slot. Clicking the banner resets the UI without closing it." data-vi="Hiển thị logo server trong UI bên dưới ô kết quả. Click vào banner để reset UI mà không cần đóng lại.">Displays your server logo inside the UI below the result slot. Clicking the banner resets the UI without closing it.</p>
+
+  <div class="pre-wrap">
+    <pre><code><span class="hl-key">Config</span>.ServerBanner = {
+    enabled = <span class="hl-fn">true</span>,
+    url     = <span class="hl-str">'https://your-image-link.png'</span>, <span class="hl-cmt">-- direct image URL</span>
+    alt     = <span class="hl-str">'Your Server Name'</span>,
+}</code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+
+  <div class="callout callout-info">
+    <i class="fas fa-image"></i>
+    <div>
+      <strong data-en="Recommended image size" data-vi="Kích thước ảnh khuyến nghị">Recommended image size</strong><br>
+      <span data-en="250 × 250 px square (PNG with transparent background looks best on the dark UI). Supports PNG and JPG." data-vi="250 × 250 px hình vuông (PNG nền trong suốt trông đẹp nhất trên UI tối). Hỗ trợ PNG và JPG.">250 × 250 px square (PNG with transparent background looks best on the dark UI). Supports PNG and JPG.</span>
+    </div>
+  </div>
+
+  <h3 data-en="Shield Card" data-vi="Thẻ Bảo Vệ">Shield Card</h3>
+  <p data-en="When placed in the shield slot, this item protects the upgrade item on failure. The shield is always consumed when used." data-vi="Khi đặt vào ô shield, item này bảo vệ vật phẩm nâng cấp khi thất bại. Thẻ luôn bị tiêu thụ khi dùng.">When placed in the shield slot, this item protects the upgrade item on failure. The shield is always consumed when used.</p>
+  <div class="pre-wrap">
+    <pre><code><span class="hl-key">Config</span>.ShieldItem = {
+    item   = <span class="hl-str">'protection_card'</span>, <span class="hl-cmt">-- ox_inventory item name</span>
+    label  = <span class="hl-str">'Protection Card'</span>,
+    amount = <span class="hl-num">1</span>,
+}</code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+  <div class="doc-footer">
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('config-basic')"><i class="fas fa-arrow-left"></i> <span data-en="Basic Settings" data-vi="Cài Đặt Cơ Bản">Basic Settings</span></button>
+      <button class="footer-btn next" onclick="show('config-webhook')"><span data-en="Webhook" data-vi="Webhook">Webhook</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ WEBHOOK ══════════════════════════════════════════════ -->
+<section class="doc-section" id="sec-config-webhook">
+  <h2 data-en="Discord Webhook" data-vi="Webhook Discord">Discord Webhook</h2>
+  <p data-en="Every upgrade event is sent as a Discord embed to your admin channel in real time." data-vi="Mọi sự kiện nâng cấp được gửi dưới dạng embed Discord về kênh admin theo thời gian thực.">Every upgrade event is sent as a Discord embed to your admin channel in real time.</p>
+
+  <div class="pre-wrap">
+    <pre><code><span class="hl-key">Config</span>.WebhookURL         = <span class="hl-str">'https://discord.com/api/webhooks/...'</span>
+<span class="hl-key">Config</span>.WebhookName        = <span class="hl-str">'S82 Upgrade | Log'</span>
+<span class="hl-key">Config</span>.WebhookAvatar      = <span class="hl-str">'https://your-avatar.png'</span>
+<span class="hl-key">Config</span>.WebhookLogSuccess  = <span class="hl-fn">true</span>  <span class="hl-cmt">-- log successful upgrades</span>
+<span class="hl-key">Config</span>.WebhookLogFail     = <span class="hl-fn">true</span>  <span class="hl-cmt">-- log failed upgrades</span>
+<span class="hl-key">Config</span>.WebhookLogExploit  = <span class="hl-fn">true</span>  <span class="hl-cmt">-- log detected exploits</span></code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+
+  <h3 data-en="What gets logged" data-vi="Nội Dung Log">What gets logged</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th data-en="Event" data-vi="Sự Kiện">Event</th>
+        <th data-en="Color" data-vi="Màu">Color</th>
+        <th data-en="Fields included" data-vi="Trường thông tin">Fields included</th>
+      </tr></thead>
+      <tbody>
+        <tr><td data-en="Success" data-vi="Thành Công">Success</td><td>🟢</td><td data-en="Player, Discord ID, item, result, bonuses, shield" data-vi="Người chơi, Discord ID, item, kết quả, bonus, shield">Player, Discord ID, item, result, bonuses, shield</td></tr>
+        <tr><td data-en="Fail" data-vi="Thất Bại">Fail</td><td>🔴</td><td data-en="Player, Discord ID, item, bonuses, shield" data-vi="Người chơi, Discord ID, item, bonus, shield">Player, Discord ID, item, bonuses, shield</td></tr>
+        <tr><td data-en="Exploit" data-vi="Exploit">Exploit</td><td>🔴</td><td data-en="Player, reason, raw data payload" data-vi="Người chơi, lý do, dữ liệu raw">Player, reason, raw data payload</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 data-en="Version Check" data-vi="Kiểm Tra Phiên Bản">Version Check</h3>
+  <div class="pre-wrap">
+    <pre><code><span class="hl-key">Config</span>.VersionCheckEnabled = <span class="hl-fn">true</span>
+<span class="hl-key">Config</span>.VersionCheckURL     = <span class="hl-str">'https://...'</span> <span class="hl-cmt">-- leave as default</span></code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+  <div class="doc-footer">
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('config-banner')"><i class="fas fa-arrow-left"></i> <span data-en="Server Banner" data-vi="Banner Server">Server Banner</span></button>
+      <button class="footer-btn next" onclick="show('config-recipes')"><span data-en="Recipes" data-vi="Công Thức">Recipes</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RECIPES ══════════════════════════════════════════════ -->
+<section class="doc-section" id="sec-config-recipes">
+  <h2 data-en="Recipes" data-vi="Công Thức Nâng Cấp">Recipes</h2>
+  <p data-en="Recipes define every item that can be upgraded. Add as many as needed inside Config.Recipes in config.lua." data-vi="Công thức xác định từng vật phẩm có thể nâng cấp. Thêm bao nhiêu tùy ý vào Config.Recipes trong config.lua.">Recipes define every item that can be upgraded. Add as many as needed inside <code>Config.Recipes</code> in config.lua.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th data-en="Field" data-vi="Trường">Field</th>
+        <th data-en="Type" data-vi="Loại">Type</th>
+        <th data-en="Description" data-vi="Mô Tả">Description</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>id</td><td><code>string</code></td><td data-en="ox_inventory item name dragged into upgrade slot" data-vi="Tên item ox_inventory kéo vào ô nâng cấp">ox_inventory item name dragged into upgrade slot</td></tr>
+        <tr><td>result</td><td><code>table</code></td><td data-en="{ item, amount } — reward on success" data-vi="{ item, amount } — phần thưởng khi thành công">{ item, amount } — reward on success</td></tr>
+        <tr><td>craftTime</td><td><code>number</code></td><td data-en="Duration of upgrade animation (ms)" data-vi="Thời gian animation nâng cấp (ms)">Duration of upgrade animation (ms)</td></tr>
+        <tr><td>baseLuck</td><td><code>number</code></td><td data-en="Base success rate (%)" data-vi="Tỷ lệ thành công cơ bản (%)">Base success rate (%)</td></tr>
+        <tr><td>maxLuck</td><td><code>number</code></td><td data-en="Max rate including all bonuses (%)" data-vi="Tỷ lệ tối đa kể cả bonus (%)">Max rate including all bonuses (%)</td></tr>
+        <tr><td>shieldable</td><td><code>boolean</code></td><td data-en="Allow shield card on this recipe" data-vi="Cho phép dùng thẻ bảo vệ">Allow shield card on this recipe</td></tr>
+        <tr><td>failReturn</td><td><code>table?</code></td><td data-en="Optional item returned to player on failure" data-vi="Vật phẩm trả lại khi thất bại (tùy chọn)">Optional item returned to player on failure</td></tr>
+        <tr><td>requiredItems</td><td><code>table[]</code></td><td data-en="Mandatory materials { item, amount, label }" data-vi="Nguyên liệu bắt buộc { item, amount, label }">Mandatory materials { item, amount, label }</td></tr>
+        <tr><td>optionalItems</td><td><code>table[]</code></td><td data-en="Bonus materials { item, amount, label, luckBonus }" data-vi="Nguyên liệu bonus { item, amount, label, luckBonus }">Bonus materials { item, amount, label, luckBonus }</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 data-en="Example Recipe" data-vi="Ví Dụ Công Thức">Example Recipe</h3>
+  <div class="pre-wrap">
+    <pre><code>{
+    <span class="hl-key">id</span>          = <span class="hl-str">'weapon_pistol'</span>,
+    <span class="hl-key">label</span>       = <span class="hl-str">'Pistol Upgrade'</span>,
+    <span class="hl-key">result</span>      = { item = <span class="hl-str">'weapon_pistol_mk2'</span>, amount = <span class="hl-num">1</span> },
+    <span class="hl-key">craftTime</span>   = <span class="hl-num">6000</span>,
+    <span class="hl-key">baseLuck</span>    = <span class="hl-num">35</span>,
+    <span class="hl-key">maxLuck</span>     = <span class="hl-num">65</span>,
+    <span class="hl-key">shieldable</span>  = <span class="hl-fn">true</span>,
+    <span class="hl-cmt">-- failReturn = { item = 'pistol_scrap', amount = 1 },</span>
+    <span class="hl-key">requiredItems</span> = {
+        { item = <span class="hl-str">'metalscrap'</span>, amount = <span class="hl-num">5</span>, label = <span class="hl-str">'Metal Scrap'</span> },
+        { item = <span class="hl-str">'steel'</span>,      amount = <span class="hl-num">3</span>, label = <span class="hl-str">'Steel'</span> },
+    },
+    <span class="hl-key">optionalItems</span> = {
+        { item = <span class="hl-str">'gun_oil'</span>, amount = <span class="hl-num">1</span>, label = <span class="hl-str">'Gun Oil'</span>, luckBonus = <span class="hl-num">15</span> },
+    },
+},</code></pre>
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+  <div class="doc-footer">
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('config-webhook')"><i class="fas fa-arrow-left"></i> <span data-en="Webhook" data-vi="Webhook">Webhook</span></button>
+      <button class="footer-btn next" onclick="show('howtoplay')"><span data-en="How to Play" data-vi="Cách Chơi">How to Play</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW TO PLAY ═════════════════════════════════════════ -->
+<section class="doc-section" id="sec-howtoplay">
+  <h2 data-en="How to Play" data-vi="Cách Chơi">How to Play</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-line"><div class="step-num">1</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Go to the Upgrade Table" data-vi="Đến Bàn Nâng Cấp">Go to the Upgrade Table</h4>
+        <p data-en="Walk to any crafting location set in config.lua. Look at the prop and press [E] or interact via ox_target." data-vi="Đi đến vị trí bàn nâng cấp trong config.lua. Nhìn vào prop và nhấn [E] hoặc tương tác qua ox_target.">Walk to any crafting location set in config.lua. Look at the prop and press <code>[E]</code> or interact via ox_target.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">2</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Drag Your Item" data-vi="Kéo Vật Phẩm">Drag Your Item</h4>
+        <p data-en="Find your item in the inventory panel on the left. Hold and drag it into the UPGRADE ITEM slot in the center." data-vi="Tìm vật phẩm trong túi đồ bên trái. Nhấn giữ và kéo vào ô VẬT PHẨM NÂNG CẤP ở giữa màn hình.">Find your item in the inventory panel on the left. Hold and drag it into the <strong data-en="UPGRADE ITEM" data-vi="VẬT PHẨM NÂNG CẤP">UPGRADE ITEM</strong> slot in the center.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">3</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Add Materials" data-vi="Thêm Nguyên Liệu">Add Materials</h4>
+        <p data-en="Drag required materials into their slots. Optionally click bonus materials to activate the luck boost." data-vi="Kéo nguyên liệu bắt buộc vào đúng ô. Tùy chọn click nguyên liệu bonus để kích hoạt tăng tỷ lệ.">Drag required materials into their slots. Optionally click bonus materials to activate the luck boost.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">4</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Shield (Optional)" data-vi="Thẻ Bảo Vệ (Tùy Chọn)">Shield (Optional)</h4>
+        <p data-en="If the recipe supports shield and you have a protection card, drag it into the shield slot." data-vi="Nếu công thức hỗ trợ shield và bạn có thẻ bảo vệ, kéo thẻ vào ô shield.">If the recipe supports shield and you have a protection card, drag it into the shield slot.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">5</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Upgrade!" data-vi="Nâng Cấp!">Upgrade!</h4>
+        <p data-en="Click the UPGRADE button and wait for the result animation. The progress ring will fill while upgrading." data-vi="Nhấn nút NÂNG CẤP và chờ animation kết quả. Vòng tiến trình sẽ đầy dần trong lúc nâng cấp.">Click the <strong>UPGRADE</strong> button and wait for the result animation.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">6</div><div class="step-connector"></div></div>
+      <div class="step-body">
+        <h4 data-en="Reset for Next Upgrade" data-vi="Reset Cho Lần Tiếp">Reset for Next Upgrade</h4>
+        <p data-en="Click the server banner image in the right panel to instantly reset the entire UI for a new upgrade." data-vi="Click vào ảnh banner server trong panel bên phải để reset ngay toàn bộ UI cho lần nâng cấp mới.">Click the server banner image to instantly reset the entire UI for a new upgrade.</p>
+      </div>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('config-recipes')"><i class="fas fa-arrow-left"></i> <span data-en="Recipes" data-vi="Công Thức">Recipes</span></button>
+      <button class="footer-btn next" onclick="show('faq')"><span>FAQ</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══════════════════════════════════════════════════ -->
+<section class="doc-section" id="sec-faq">
+  <h2>FAQ</h2>
+
+  <h3 data-en="Item images not showing?" data-vi="Ảnh vật phẩm không hiện?">Item images not showing?</h3>
+  <p data-en="Check Config.ImagePath and ensure ox_inventory is running. Default path:" data-vi="Kiểm tra Config.ImagePath và đảm bảo ox_inventory đang chạy. Đường dẫn mặc định:">Check <code>Config.ImagePath</code> and ensure ox_inventory is running. Default path:</p>
+  <div class="pre-wrap"><pre><code><span class="hl-key">Config</span>.ImagePath = <span class="hl-str">'nui://ox_inventory/web/images/'</span></code></pre></div>
+
+  <h3 data-en="Notifications not appearing?" data-vi="Thông báo không hiện?">Notifications not appearing?</h3>
+  <p data-en="Make sure ox_lib is ensured BEFORE S82dapbalo in server.cfg." data-vi="Đảm bảo ox_lib được ensure TRƯỚC S82dapbalo trong server.cfg.">Make sure <code>ox_lib</code> is ensured BEFORE <code>S82dapbalo</code> in server.cfg.</p>
+
+  <h3 data-en="ox_target not working?" data-vi="ox_target không hoạt động?">ox_target not working?</h3>
+  <p data-en="Set Config.UseOxTarget = true and confirm ox_target is running." data-vi="Đặt Config.UseOxTarget = true và xác nhận ox_target đang chạy.">Set <code>Config.UseOxTarget = true</code> and confirm ox_target is running.</p>
+
+  <h3 data-en="Webhook not receiving messages?" data-vi="Webhook không nhận tin?">Webhook not receiving messages?</h3>
+  <p data-en="Verify the webhook URL is correct and the Discord bot has permission to post in that channel." data-vi="Kiểm tra URL webhook đúng định dạng và bot Discord có quyền đăng tin trong kênh đó.">Verify the webhook URL is correct and the Discord bot has permission to post in that channel.</p>
+
+  <h3 data-en="Console says update available?" data-vi="Console báo có phiên bản mới?">Console says update available?</h3>
+  <p data-en="Download the latest version from your Tebex S82 purchase page." data-vi="Tải phiên bản mới nhất từ trang mua Tebex S82.">Download the latest version from your Tebex S82 purchase page.</p>
+
+  <h3 data-en="Sound only plays on first upgrade?" data-vi="Âm thanh chỉ kêu lần đầu?">Sound only plays on first upgrade?</h3>
+  <p data-en="This was a bug in v2.0.0, fixed in v2.1.0. Make sure you are using the latest version." data-vi="Đây là bug trong v2.0.0, đã được sửa trong v2.1.0. Hãy chắc chắn bạn đang dùng phiên bản mới nhất.">This was a bug in v2.0.0, fixed in v2.1.0. Make sure you are using the latest version.</p>
+
+  <div class="callout callout-tip" style="margin-top:32px">
+    <i class="fas fa-headset"></i>
+    <div>
+      <strong data-en="Still need help?" data-vi="Vẫn cần hỗ trợ?">Still need help?</strong><br>
+      <span data-en="Join the S82 Dev Discord server for support." data-vi="Tham gia Discord S82 Dev để được hỗ trợ.">Join the S82 Dev Discord server for support.</span>
+      <a href="#" style="margin-left:8px" data-en="Join Discord →" data-vi="Vào Discord →">Join Discord →</a>
+    </div>
+  </div>
+  <div class="doc-footer">
+    <p>© 2025 S82 Dev</p>
+    <div class="footer-nav">
+      <button class="footer-btn" onclick="show('howtoplay')"><i class="fas fa-arrow-left"></i> <span data-en="How to Play" data-vi="Cách Chơi">How to Play</span></button>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// ── NAV ──────────────────────────────────────────────────────
+const sectionMap = {
+  'intro':          'sec-intro',
+  'requirements':   'sec-requirements',
+  'install':        'sec-install',
+  'config-basic':   'sec-config-basic',
+  'config-banner':  'sec-config-banner',
+  'config-webhook': 'sec-config-webhook',
+  'config-recipes': 'sec-config-recipes',
+  'howtoplay':      'sec-howtoplay',
+  'faq':            'sec-faq',
+};
+
+function show(id) {
+  // hide all
+  document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('active'));
+  // show target
+  const el = document.getElementById(sectionMap[id]);
+  if (el) el.classList.add('active');
+  // update sidebar
+  document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+  const btn = [...document.querySelectorAll('.sidebar-link')].find(b => {
+    const span = b.querySelector('span[data-en]');
+    return b.getAttribute('onclick') === `show('${id}')`;
+  });
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // close sidebar on mobile
+  if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
+}
+
+// ── LANGUAGE ─────────────────────────────────────────────────
+let lang = 'en';
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-vi').classList.toggle('active', l === 'vi');
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const val = el.getAttribute('data-' + l);
+    if (!val) return;
+    if (el.tagName === 'INPUT') { el.placeholder = val; }
+    else { el.innerHTML = val; }
+  });
+}
+
+// ── COPY CODE ─────────────────────────────────────────────────
+function copyCode(btn) {
+  const pre = btn.previousElementSibling;
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+      btn.style.color = '';
+    }, 1600);
+  });
+}
+
+// ── MOBILE SIDEBAR ────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// init
+setLang('en');
+</script>
+</body>
+</html>
